@@ -28,13 +28,24 @@ if [ -z "$MAKE_J" ] ; then
 	MAKE_J=${MAKE_J:--j1}
 fi
 
+
+cmake_build() {
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_COLOR_MAKEFILE=OFF \
+		-DCMAKE_C_FLAGS="${CPPFLAGS} ${CFLAGS}" \
+		-DCOMPILER_PREFIX=${HOST} \
+		-DSYSROOT_PATH=${SYSROOT} \
+		-DCMAKE_TOOLCHAIN_FILE=${CURDIR}/CI/appveyor/mingw32-linux.cmake \
+		-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
+		..
+}
+
 # Build the osc
 build_osc () {
-	mkdir -p "${CURDIR}/build"
-	cd "${CURDIR}/build"
-	cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
-		-DCMAKE_SYSROOT="${SYSROOT}" \
-		..
+	cd "${CURDIR}"
+	rm -rf build
+	mkdir -p build
+	cd build
+	cmake_build
 	make ${MAKE_J}
 	make install
 }
